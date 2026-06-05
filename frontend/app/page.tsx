@@ -1,4 +1,32 @@
+"use client";
+
+import { useState } from "react";
+
 export default function Home() {
+  const [loading, setLoading] = useState(false);
+  const [wasteType, setWasteType] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [location, setLocation] = useState("");
+  const [result, setResult] = useState("");
+
+  const handleSubmit = async () => {
+  setLoading(true);
+
+  try {
+    const res = await fetch("http://localhost:5000/api/recommend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ wasteType, quantity, location }),
+    });
+
+    const data = await res.json();
+    setResult(data.recommendation);
+  } catch (err) {
+    setResult("Backend not responding.");
+  }
+
+  setLoading(false);
+};
   return (
     <main className="min-h-screen bg-green-50">
 
@@ -19,34 +47,53 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="flex flex-col items-center justify-center text-center py-32">
+      <section className="flex flex-col items-center justify-center text-center py-16">
 
-        <h1 className="text-6xl font-bold text-green-700">
+        <h1 className="text-5xl font-bold text-green-700">
           Sustainable Shopping Made Easy
         </h1>
 
-        <p className="text-xl text-gray-600 mt-6 max-w-2xl">
-          Discover eco-friendly alternatives to everyday products using AI.
-          Support local businesses and reduce your environmental footprint.
+        <p className="text-lg text-gray-600 mt-4 max-w-2xl">
+          Discover eco-friendly alternatives and manage waste intelligently using AI.
         </p>
 
-        <div className="flex gap-4 mt-10">
+        {/* Input Form */}
+        <div className="bg-white shadow-xl rounded-xl p-6 mt-10 w-96">
 
-          <a
-            href="/chatbot"
-            className="bg-green-600 text-white px-8 py-4 rounded-xl hover:bg-green-700"
-          >
-            Start Exploring
-          </a>
+          <input
+            className="w-full border p-2 mb-3"
+            placeholder="Waste Type (Plastic, Paper...)"
+            onChange={(e) => setWasteType(e.target.value)}
+          />
 
-          <a
-            href="/businesses"
-            className="border border-green-600 px-8 py-4 rounded-xl hover:bg-green-100"
-          >
-            Local Businesses
-          </a>
+          <input
+            className="w-full border p-2 mb-3"
+            placeholder="Quantity"
+            onChange={(e) => setQuantity(e.target.value)}
+          />
+
+          <input
+            className="w-full border p-2 mb-3"
+            placeholder="Location"
+            onChange={(e) => setLocation(e.target.value)}
+          />
+
+          <button
+  onClick={handleSubmit}
+  className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700"
+>
+  {loading ? "Analyzing Waste..." : "Get Recommendation"}
+</button>
 
         </div>
+
+        {/* Result */}
+        {result && (
+          <div className="bg-white mt-6 p-4 rounded shadow-md w-96">
+            <h2 className="font-bold text-green-700">Recommendation</h2>
+            <p>{result}</p>
+          </div>
+        )}
 
       </section>
 
