@@ -1,10 +1,10 @@
 const express = require("express");
 const cors = require("cors");
-
 const app = express();
 const jwt = require("jsonwebtoken");
-
 const SECRET_KEY = "ecowise_secret";
+app.use(cors({ origin: "http://localhost:3000" }));
+app.use(express.json());
 
 const users = [
   {
@@ -13,60 +13,7 @@ const users = [
     password: "123456789" // we’ll simplify below
   }
 ];
-app.post("/api/login", (req, res) => {
-  const { email, password } = req.body;
 
-  const user = users.find(u => u.email === email);
-
-  if (!user || password !== "123456789") {
-    return res.status(401).json({ message: "Invalid credentials" });
-  }
-
-  const token = jwt.sign(
-    { id: user.id, email: user.email },
-    SECRET_KEY,
-    { expiresIn: "1h" }
-  );
-
-  res.json({ token });
-});
-
-function authMiddleware(req, res, next) {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader) {
-    return res.status(401).json({ message: "No token provided" });
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  try {
-    const decoded = jwt.verify(token, SECRET_KEY);
-    req.user = decoded;
-    next();
-  } catch (err) {
-    return res.status(401).json({ message: "Invalid token" });
-  }
-}
-app.get("/api/businesses", authMiddleware, (req, res) => {
-  res.json(businesses);
-});
-app.use(cors({ origin: "http://localhost:3000" }));
-app.use(express.json());
-
-function normalizeWasteType(input) {
-  if (!input) return "unknown";
-
-  input = input.toLowerCase().trim();
-
-  if (input.includes("plastic")) return "plastic";
-  if (input.includes("paper") || input.includes("cardboard")) return "paper";
-  if (input.includes("glass")) return "glass";
-  if (input.includes("metal") || input.includes("aluminium") || input.includes("steel")) return "metal";
-  if (input.includes("organic") || input.includes("food") || input.includes("waste")) return "organic";
-
-  return "unknown";
-}
 const businesses = [
   {
     id: 1,
@@ -102,7 +49,44 @@ const businesses = [
   }
 ];
 
-app.get("/api/businesses", (req, res) => {
+function authMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+}
+
+app.post("/api/login", (req, res) => {
+  const { email, password } = req.body;
+
+  const user = users.find(u => u.email === email);
+
+  if (!user || password !== "123456789") {
+    return res.status(401).json({ message: "Invalid credentials" });
+  }
+
+  const token = jwt.sign(
+    { id: user.id, email: user.email },
+    SECRET_KEY,
+    { expiresIn: "1h" }
+  );
+
+  res.json({ token });
+});
+
+
+app.get("/api/businesses", authMiddleware, (req, res) => {
   res.json(businesses);
 });
 
@@ -120,6 +104,22 @@ if (isNaN(id)) {
 
   res.json(business);
 });
+
+function normalizeWasteType(input) {
+  if (!input) return "unknown";
+
+  input = input.toLowerCase().trim();
+
+  if (input.includes("plastic")) return "plastic";
+  if (input.includes("paper") || input.includes("cardboard")) return "paper";
+  if (input.includes("glass")) return "glass";
+  if (input.includes("metal") || input.includes("aluminium") || input.includes("steel")) return "metal";
+  if (input.includes("organic") || input.includes("food") || input.includes("waste")) return "organic";
+
+  return "unknown";
+}
+
+
 app.get("/", (req, res) => {
   res.send("Eco System Running");
 });

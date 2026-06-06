@@ -1,22 +1,30 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Businesses() {
   const router = useRouter();
+  const [data, setData] = useState<any[]>([]);
 
   useEffect(() => {
-  const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-  fetch("http://localhost:5000/api/login", {
-    headers: {
-      Authorization: `Bearer ${token}`
+    if (!token) {
+      console.log("No token found");
+      router.push("/login");
+      return;
     }
-  })
-    .then(res => res.json())
-    .then(setData);
-}, []);
+
+    fetch("http://localhost:5000/api/businesses", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then(setData)
+      .catch((err) => console.log(err));
+  }, []);
 
   return (
     <div className="p-10">
@@ -27,6 +35,17 @@ export default function Businesses() {
       <p className="mt-4">
         List of eco-friendly partner businesses will appear here.
       </p>
+
+      {/* DISPLAY DATA */}
+      <div className="mt-6 grid gap-4">
+        {data.map((b: any) => (
+          <div key={b.id} className="p-4 bg-white shadow rounded">
+            <h2 className="font-bold text-green-700">{b.name}</h2>
+            <p>{b.type}</p>
+            <p className="text-gray-500">{b.location}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

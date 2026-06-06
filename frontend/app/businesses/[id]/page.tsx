@@ -6,12 +6,32 @@ import { useParams } from "next/navigation";
 export default function BusinessDetail() {
   const { id } = useParams();
   const [business, setBusiness] = useState<any>(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/businesses/${id}`)
-      .then(res => res.json())
-      .then(setBusiness);
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      window.location.href = "/login";
+      return;
+    }
+
+    fetch(`http://localhost:5000/api/businesses/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch business");
+        return res.json();
+      })
+      .then(setBusiness)
+      .catch(err => setError(err.message));
   }, [id]);
+
+  if (error) {
+    return <p className="p-10 text-red-600">{error}</p>;
+  }
 
   if (!business) return <p className="p-10">Loading...</p>;
 

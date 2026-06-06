@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useState } from "react";
 
 export default function Home() {
@@ -8,6 +10,7 @@ export default function Home() {
   const [quantity, setQuantity] = useState("");
   const [location, setLocation] = useState("");
   const [result, setResult] = useState("");
+  const [history, setHistory] = useState([]);
 
   const handleSubmit = async () => {
   setLoading(true);
@@ -20,7 +23,11 @@ export default function Home() {
     });
 
     const data = await res.json();
+
     setResult(data.recommendation);
+
+    setHistory((prev) => [...prev, data.recommendation]);
+
   } catch (err) {
     setResult("Backend not responding.");
   }
@@ -30,70 +37,64 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-green-50">
 
-      {/* Navbar */}
-      <nav className="flex justify-between items-center px-10 py-6 bg-white shadow">
+      {/* NAVBAR */}
+      <nav className="bg-white shadow-md px-10 py-6 flex justify-between items-center">
 
-        <h1 className="text-2xl font-bold text-green-700">
-          🌱 EcoChoice AI
+        <h1 className="text-3xl font-extrabold text-green-700 tracking-wide">
+          🌱 EcoWise AI
         </h1>
 
-        <div className="flex gap-6">
-          <a href="/" className="hover:text-green-600">Home</a>
-          <a href="/chatbot" className="hover:text-green-600">AI Chat</a>
-          <a href="/businesses" className="hover:text-green-600">Businesses</a>
-          <a href="/dashboard" className="hover:text-green-600">Dashboard</a>
+        <div className="flex gap-10 text-lg font-semibold">
+
+          <Link href="/" className="hover:text-green-600 transition">
+            Home
+          </Link>
+
+          <Link href="/chatbot" className="hover:text-green-600 transition">
+            AI Chat
+          </Link>
+
+          <Link href="/businesses" className="hover:text-green-600 transition">
+            Businesses
+          </Link>
+
+          <Link href="/dashboard" className="hover:text-green-600 transition">
+            Dashboard
+          </Link>
+
         </div>
 
       </nav>
 
-      {/* Hero Section */}
-      <section className="flex flex-col items-center justify-center text-center py-16">
+      {/* HERO */}
+      <section className="text-center py-28 px-6">
 
-        <h1 className="text-5xl font-bold text-green-700">
-          Sustainable Shopping Made Easy
+        <h1 className="text-6xl font-extrabold text-green-700 leading-tight">
+          Sustainable Choices <br /> Made Simple 🌍
         </h1>
 
-        <p className="text-lg text-gray-600 mt-4 max-w-2xl">
-          Discover eco-friendly alternatives and manage waste intelligently using AI.
+        <p className="text-xl text-gray-600 mt-6 max-w-3xl mx-auto">
+          Discover eco-friendly alternatives, manage waste smarter, and connect
+          with green businesses using AI.
         </p>
 
-        {/* Input Form */}
-        <div className="bg-white shadow-xl rounded-xl p-6 mt-10 w-96">
+        <div className="flex justify-center gap-6 mt-10">
 
-          <input
-            className="w-full border p-2 mb-3"
-            placeholder="Waste Type (Plastic, Paper...)"
-            onChange={(e) => setWasteType(e.target.value)}
-          />
+          <Link
+            href="/chatbot"
+            className="bg-green-600 text-white text-lg px-8 py-4 rounded-2xl shadow hover:bg-green-700 transition"
+          >
+            Start AI Chat 🤖
+          </Link>
 
-          <input
-            className="w-full border p-2 mb-3"
-            placeholder="Quantity"
-            onChange={(e) => setQuantity(e.target.value)}
-          />
-
-          <input
-            className="w-full border p-2 mb-3"
-            placeholder="Location"
-            onChange={(e) => setLocation(e.target.value)}
-          />
-
-          <button
-  onClick={handleSubmit}
-  className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700"
->
-  {loading ? "Analyzing Waste..." : "Get Recommendation"}
-</button>
+          <Link
+            href="/businesses"
+            className="border-2 border-green-600 text-green-700 text-lg px-8 py-4 rounded-2xl hover:bg-green-100 transition"
+          >
+            Explore Businesses 🏢
+          </Link>
 
         </div>
-
-        {/* Result */}
-        {result && (
-          <div className="bg-white mt-6 p-4 rounded shadow-md w-96">
-            <h2 className="font-bold text-green-700">Recommendation</h2>
-            <p>{result}</p>
-          </div>
-        )}
 
       </section>
 
